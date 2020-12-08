@@ -37,6 +37,11 @@ try:
                 input(f"ERROR : Could not find setting called {nameOfSetting} in 'autocontroller.ini'. Press Enter to continue anyways.")
                 return None
 
+    with open("autocontrollerText.txt","r") as f:
+        for x in f.readlines():
+            print(x.strip("\n"))
+    print("")
+    
     fallout3PrefsFileLocation = getFromINI("prefsFileLocation").strip()
     # Here you could put your own checks
     print("Checking if steam link is connected... (aka if 'steam_monitor.exe' is running)")
@@ -54,4 +59,4 @@ try:
     time.sleep(1)
     os.startfile("FalloutLauncher2.exe")
 except Exception as e:
-    input("ERROR! : " + e)
+    input("ERROR! : " + str(e))
