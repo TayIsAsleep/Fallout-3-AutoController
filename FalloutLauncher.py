@@ -31,7 +31,11 @@ try:
                 a = x.split("=")
                 settingName.append(a[0])
                 settingSetTo.append(a[1])
-            return settingSetTo[settingName.index(nameOfSetting)].strip("\n")
+            try:
+                return settingSetTo[settingName.index(nameOfSetting)].strip("\n")
+            except:
+                input(f"ERROR : Could not find setting called {nameOfSetting} in 'autocontroller.ini'. Press Enter to continue anyways.")
+                return None
 
     fallout3PrefsFileLocation = getFromINI("prefsFileLocation").strip()
     # Here you could put your own checks
