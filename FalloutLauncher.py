@@ -4,7 +4,7 @@ try:
         '''
         Check if there is any running process that contains the given name processName.
         '''
-        for proc in psutil.process_iter(): #Iterate over the all the running process
+        for proc in psutil.process_iter(): # Iterate over the all the running process
             try: # Check if process name contains the given name string.
                 if processName.lower() in proc.name().lower():
                     return True
@@ -12,23 +12,31 @@ try:
                 pass
         return False
     def replaceAll(file,searchExp,replaceExp):
+        '''
+        Replaces words in a text file with other words.
+        '''
         for line in fileinput.input(file, inplace=1):
             if searchExp in line:
                 line = line.replace(searchExp,replaceExp)
             sys.stdout.write(line)
+    def getFromINI(nameOfSetting):
+        '''
+        Gets a setting from the autocontroller.ini file, and returns the value next to it
+        '''
+        with open("autocontroller.ini", "r") as f:
+            allLines = f.readlines()
+            settingName = []
+            settingSetTo = []
+            for x in allLines:
+                a = x.split("=")
+                settingName.append(a[0])
+                settingSetTo.append(a[1])
+            return settingSetTo[settingName.index(nameOfSetting)].strip("\n")
 
+    fallout3PrefsFileLocation = getFromINI("prefsFileLocation").strip()
+    # Here you could put your own checks
     print("Checking if steam link is connected... (aka if 'steam_monitor.exe' is running)")
     steamLinkIsConnected = checkIfProcessRunning("steam_monitor.exe")
-    with open("autocontroller.ini", "r") as f:
-        allLines = f.readlines()
-        settingName = []
-        settingSetTo = []
-        for x in allLines:
-            a = x.split("=")
-            settingName.append(a[0])
-            settingSetTo.append(a[1])
-        fallout3PrefsFileLocation = settingSetTo[settingName.index("prefsFileLocation")]
-    
     print("Is steam link connected? :",steamLinkIsConnected)
 
     if steamLinkIsConnected:
@@ -42,4 +50,4 @@ try:
     time.sleep(1)
     os.startfile("FalloutLauncher2.exe")
 except Exception as e:
-    input(e)
+    input("ERROR! : " + e)
