@@ -17,46 +17,76 @@ try:
         '''
         for line in fileinput.input(file, inplace=1):
             if searchExp in line:
-                line = line.replace(searchExp,replaceExp)
+                line = line.replace(searchExp,replaceExp)    
             sys.stdout.write(line)
     def getFromINI(nameOfSetting):
         '''
         Gets a setting from the autocontroller.ini file, and returns the value next to it
         '''
         with open("autocontroller.ini", "r") as f:
-            allLines = f.readlines()
-            settingName = []
-            settingSetTo = []
+            allLines,settingName,settingSetTo= f.readlines(),[],[]
             for x in allLines:
-                a = x.split("=")
-                settingName.append(a[0])
-                settingSetTo.append(a[1])
-            try:
+                if "=" in x and not (x.startswith("#") or x.strip() == ""):
+                    a = x.split("=")
+                    settingName.append(a[0])
+                    settingSetTo.append(a[1])
+            if nameOfSetting in settingName:
                 return settingSetTo[settingName.index(nameOfSetting)].strip("\n")
-            except:
-                input(f"ERROR : Could not find setting called {nameOfSetting} in 'autocontroller.ini'. Press Enter to continue anyways.")
-                return None
+            return None
+    def setControllerSupportTo(trueOrFalse):
+        '''
+        Does what it says on the tin. Requires 'prefFileLocation' to be set.
+        '''
+        global prefFileLocation
+        if trueOrFalse:
+            replaceAll(prefFileLocation,"bDisable360Controller=1","bDisable360Controller=0")
+            print("Controller support is now set to ON")
+        else:
+            replaceAll(prefFileLocation,"bDisable360Controller=0","bDisable360Controller=1")
+            print("Controller support is now set to OFF")
 
+    # Prints out ASCII text and version number
     with open("autocontrollerText.txt","r") as f:
         for x in f.readlines():
             print(x.strip("\n"))
-    print("")
+    print("(v0.8)\n")
     
-    fallout3PrefsFileLocation = getFromINI("prefsFileLocation").strip()
-    # Here you could put your own checks
-    print("Checking if steam link is connected... (aka if 'steam_monitor.exe' is running)")
-    steamLinkIsConnected = checkIfProcessRunning("steam_monitor.exe")
-    print("Is steam link connected? :",steamLinkIsConnected)
+    # Checks for debugmode
+    debugMode = getFromINI("debug")
+    debugModeOn = False
+    if debugMode != None:
+        if debugMode.lower() == "true":
+            debugModeOn = True
 
-    if steamLinkIsConnected:
-        replaceAll(fallout3PrefsFileLocation,"bDisable360Controller=1","bDisable360Controller=0")
-        print("I changed bDisable360Controller to 0 (Controller support is now ON)")
+    # Gets the location of the 'FalloutPrefs.ini' file from 'autocontroller.ini'
+    prefFileLocation = getFromINI("prefsFileLocation").strip()
+
+    # Checks if prefFileLocation is set correctly, and that it ends with "FalloutPrefs.ini"
+    if prefFileLocation == r"C:\Users\EXAMPLE_USERNAME\Documents\My Games\Fallout3\FalloutPrefs.ini" or not prefFileLocation.endswith("FalloutPrefs.ini"):
+        input("ERROR! : 'prefsFileLocation' was not set correctly in 'autocontroller.ini'. Check your ini file!")
+
+    # Here you could put your own checks:
+    print("Checking if Steam Link is connected...")
+    if checkIfProcessRunning("steam_monitor.exe"):
+        print("Steam Link is connected.")
+        setControllerSupportTo(True)
     else:
-        replaceAll(fallout3PrefsFileLocation,"bDisable360Controller=0","bDisable360Controller=1")
-        print("I changed bDisable360Controller to 1 (Controller support is now OFF)")
-    
-    print("Starting game in 1 secound...")
-    time.sleep(1)
-    os.startfile("FalloutLauncher2.exe")
+        print("Steam Link is not connected.")
+        setControllerSupportTo(False)
+        
+    # Launches FalloutLauncher2.exe
+    nameOfExe = getFromINI("originalLauncherName").strip()
+    waitTime = getFromINI("waitTime")
+    if waitTime == None:
+        waitTime = 1
+    else:
+        waitTime = int(waitTime.strip())
+    if waitTime > 0:
+        print(f"\nStarting {nameOfExe} in {waitTime} secound...")
+        time.sleep(waitTime)
+    if debugModeOn:  
+        input("\nDEBUG MODE IS ON. PRESS ENTER TO LAUNCH GAME LIKE NORMAL.")
+    os.startfile(nameOfExe)
+
 except Exception as e:
-    input("ERROR! : " + str(e))
+    input("GENERAL ERROR! : " + str(e))
