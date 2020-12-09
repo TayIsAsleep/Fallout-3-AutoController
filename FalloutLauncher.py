@@ -49,7 +49,7 @@ try:
     with open("autocontrollerText.txt","r") as f:
         for x in f.readlines():
             print(x.strip("\n"))
-    print("(v0.8)\n")
+    print("(v0.9.1)\n")
     
     # Checks for debugmode
     debugMode = getFromINI("debug")
