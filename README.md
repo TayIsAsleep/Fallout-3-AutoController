@@ -11,14 +11,14 @@ This tool is for SteamLink Users that wants the game to switch controller suppor
 
 ### QnA:
 
-Q: How does it work?
+__Q:__ How does it work?
 
-A: F3AC runs before the actual launcher, and it checks if `steam_monitor.exe` is running (`steam_monitor.exe` seems to always be running when a SteamLink is connected) and if it is, it opens your `FalloutPrefs.ini` file, and replaces the line `bDisable360Controller=1` with `bDisable360Controller=0`, and then it boots up the game.
+__A:__ F3AC runs before the actual launcher, and it checks if `steam_monitor.exe` is running (`steam_monitor.exe` seems to always be running when a SteamLink is connected) and if it is, it opens your `FalloutPrefs.ini` file, and replaces the line `bDisable360Controller=1` with `bDisable360Controller=0`, and then it boots up the game.
 
-Q: Is this a virus?
+__Q:__ Is this a virus?
 
-A: No, it is not a virus. Odds are that virus detectors will warn you about the EXE file, because it doesn't want you to open random EXE files from the internet. If you don't trust me, then you could check the sourcecode, and use the make.bat file to create your own EXE file. This way you know for sure what is in the EXE.
+__A:__ No, it is not a virus. Odds are that virus detectors will warn you about the EXE file, because it doesn't want you to open random EXE files from the internet. If you don't trust me, then you could check the sourcecode, and use the make.bat file to create your own EXE file. This way you know for sure what is in the EXE.
 
-Q: Does this work with Fallout : New Vegas?
+__Q:__ Does this work with Fallout : New Vegas?
 
-A: With some slight modification, it should work, but I have not tested it yet.
+__A:__ With some slight modification, it should work, but I have not tested it yet.
