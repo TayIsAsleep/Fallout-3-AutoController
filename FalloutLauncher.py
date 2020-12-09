@@ -1,5 +1,6 @@
 try:
     import psutil,fileinput,sys,os,time
+    from pyglet.input import get_joysticks as getJoysticks 
     def checkIfProcessRunning(processName):
         '''
         Check if there is any running process that contains the given name processName.
@@ -23,16 +24,15 @@ try:
         '''
         Gets a setting from the autocontroller.ini file, and returns the value next to it
         '''
-        with open("autocontroller.ini", "r") as f:
-            allLines,settingName,settingSetTo= f.readlines(),[],[]
-            for x in allLines:
-                if "=" in x and not (x.startswith("#") or x.strip() == ""):
-                    a = x.split("=")
-                    settingName.append(a[0])
-                    settingSetTo.append(a[1])
-            if nameOfSetting in settingName:
-                return settingSetTo[settingName.index(nameOfSetting)].strip("\n")
-            return None
+        global settingName,settingSetTo
+        if nameOfSetting in settingName:
+            a = settingSetTo[settingName.index(nameOfSetting)]
+            if a.lower() == "true":
+                return True
+            if a.lower() == "false":
+                return False
+            return a
+        return None
     def setControllerSupportTo(trueOrFalse):
         '''
         Does what it says on the tin. Requires 'prefFileLocation' to be set.
@@ -49,14 +49,22 @@ try:
     with open("autocontrollerText.txt","r") as f:
         for x in f.readlines():
             print(x.strip("\n"))
-    print("(v0.9.1)\n")
+    print("(v0.9.2)\n")
     
+    # Loads ini file
+    settingName,settingSetTo=[],[]
+    with open("autocontroller.ini", "r") as f:
+        for x in f.readlines():
+            if "=" in x and not (x.startswith("#") or x.strip() == ""):
+                a = x.split("=")
+                settingName.append(a[0])
+                settingSetTo.append(a[1].strip("\n"))
+
     # Checks for debugmode
     debugMode = getFromINI("debug")
     debugModeOn = False
     if debugMode != None:
-        if debugMode.lower() == "true":
-            debugModeOn = True
+        debugModeOn = debugMode
 
     # Gets the location of the 'FalloutPrefs.ini' file from 'autocontroller.ini'
     prefFileLocation = getFromINI("prefsFileLocation").strip()
@@ -66,13 +74,33 @@ try:
         input("ERROR! : 'prefsFileLocation' was not set correctly in 'autocontroller.ini'. Check your ini file!")
 
     # Here you could put your own checks:
-    print("Checking if Steam Link is connected...")
-    if checkIfProcessRunning("steam_monitor.exe"):
-        print("Steam Link is connected.")
-        setControllerSupportTo(True)
+    doCheckSteamLink = getFromINI("checkForSteamLink")
+    doCheckController = getFromINI("checkForController")
+
+    # Check if SteamLink is connected to computer
+    steamLinkConnected = False
+    if doCheckSteamLink:
+        print("Checking if Steam Link is connected...")
+        steamLinkConnected = checkIfProcessRunning("steam_monitor.exe")
+        if steamLinkConnected:
+            print("Steam Link is connected.\n")
+        else:
+            print("Steam Link is not connected.\n")
+    
+    # Check if a controller is connected to computer
+    controllersConnected = False
+    if doCheckController:
+        print("Checking if any controllers are connected to the computer...")
+        controllersConnected = len(getJoysticks()) > 0
+        if controllersConnected:
+            print("One or more controllers detected.\n")
+        else:
+            print("No controllers detected.\n")
+
+    if doCheckController == False and doCheckSteamLink == False:
+        print("\nAll checks are off, will not change any settings.")
     else:
-        print("Steam Link is not connected.")
-        setControllerSupportTo(False)
+        setControllerSupportTo((doCheckSteamLink and steamLinkConnected) or (doCheckController and controllersConnected))
         
     # Launches FalloutLauncher2.exe
     nameOfExe = getFromINI("originalLauncherName").strip()
